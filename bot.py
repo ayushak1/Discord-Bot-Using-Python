@@ -14,7 +14,7 @@ from discord.ext import commands
 
 intents=discord.Intents.default() 
 intents.members = True
-bot = commands.Bot(command_prefix='!!', case_insensitive=True,intents=discord.Intents.all())
+bot = commands.Bot(command_prefix='-', case_insensitive=True,intents=discord.Intents.all())
 
 
 
@@ -138,6 +138,15 @@ async def timer(ctx, seconds):
         await ctx.send(f"{ctx.author.mention}, your countdown has been ended!")
     except ValueError:
         await ctx.send('You Must Enter A Number')
+        
+        
+bot.command(aliases=['dm'])
+async def DM(ctx, user : discord.User, *, msg):
+    try:
+        await user.send(msg)
+        await ctx.send(f':white_check_mark: Your Message has been sent')
+    except:
+        await ctx.send(':x: Member had their dm close, message not sent')
 
 
 # JOIN AND LEAVE CODE
