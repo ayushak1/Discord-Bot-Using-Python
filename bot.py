@@ -1,28 +1,22 @@
 import asyncio
-# # from distutils import extension
 from email import message
-# # from distutils import extension
 from re import T
 from flask import Flask
-# from keep_alive import keep_alive
 import asyncio
 import discord
 import time
 from threading import Thread
-# import sys
 
-# import os
-# import traceback
+
+
 from discord.ext import commands
-# import json
+
 
 intents=discord.Intents.default() 
 intents.members = True
 bot = commands.Bot(command_prefix='!!', case_insensitive=True,intents=discord.Intents.all())
 
-# with open("./config.json", 'r') as configjsonFile:
-#         configData = json.load(configjsonFile)
-#         TOKEN = configData["DISCORD_TOKEN"]
+
 
 @bot.event
 async def on_ready():
