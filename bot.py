@@ -3,6 +3,7 @@ from email import message
 from re import T
 import asyncio
 import discord
+import datetime
 import aiohttp
 import time
 from threading import Thread
@@ -49,6 +50,18 @@ async def meme(ctx):
 
             await ctx.reply(embed=embed,mention_author=False)    
 
+@bot.group(invoke_without_command=True)            
+async def help(ctx):
+    em = discord.Embed(title= "Help", description= "Use !help <command> for more information ",color=discord.Color.random())
+     
+    em.add_field(name= "Moderation", value= "Kick,Ban,Mute,Tempmute,Warn")
+    em.add_field(name= "Fun", value="meme")
+    
+    em.set_footer(text='Developed By Ayush',
+                     icon_url='https://cdn.discordapp.com/attachments/1011618287328698508/1012358771516903554/th.jpg')
+    
+    await ctx.reply(embed=em)
+    
 
 @bot.command()
 async def owner(ctx,):
@@ -60,14 +73,12 @@ async def hey(ctx):
     await ctx.reply('Hello! How are you!')
 
 
+
+
 @bot.command()
 async def ping(ctx):
-    await ctx.reply(f'Latency Is {round(bot.latency * 1000)}ms')
-
-
-@bot.command()
-async def joined(ctx, *, member: discord.Member):
-    await ctx.reply(f'{member} joined on {member.joined_at}')
+   embed = discord.Embed(title=f"🏓Pong! {round(ctx.bot.latency * 1000)}ms", colour=discord.Color.blue())
+   await ctx.reply(embed=embed)
 
 # member count
 
@@ -85,6 +96,14 @@ class MemberRoles(commands.MemberConverter):
         member = await super().convert(ctx, argument)
         # Remove everyone role!
         return [role.name for role in member.roles[1:]]
+
+@bot.command()
+async def messages(ctx, channel: discord.TextChannel = None):
+    channel = channel or ctx.channel
+    count = 0
+    async for _ in channel.history(limit=None):
+        count += 1
+    await ctx.reply("There were {} messages in {}".format(count, channel.mention))
 
 
 @bot.command()
@@ -111,6 +130,27 @@ async def roles(ctx, *, member: MemberRoles):
 #     await ctx.send(embed=embed)
 @bot.command()
 @commands.has_permissions(manage_messages=True)
+async def course(ctx, *, message):
+    embed = discord.Embed(title="Courses",
+                         color=discord.Color.blue(), description=message)
+    # embed.set_author(name=ctx.author)
+    # embed.set_thumbnail(url = 'https://cdn.discordapp.com/attachments/1001874634142126172/1011282329580339220/hp.jpeg')
+    embed.set_footer(text='Courses Hub',
+                     icon_url='https://cdn.discordapp.com/attachments/1001874634142126172/1011282329580339220/hp.jpeg')
+    await ctx.message.delete()
+    await ctx.send(embed=embed)
+
+
+@course.error
+async def course_error(ctx, error):
+    async def course_error(ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send('Please Specify The Numbers Of Message To Delete')
+        if isinstance(error, commands.MissingPermissions):
+            await ctx.send("You Can't Use That Command")
+
+@bot.command()
+@commands.has_permissions(manage_messages=True)
 async def job(ctx, *, message):
     embed = discord.Embed(title="JOB UPDATES",color=discord.Color.random(), description=message)
     # embed.set_author(name=ctx.author)
@@ -123,7 +163,7 @@ async def job(ctx, *, message):
 
 @job.error
 async def job_error(ctx, error):
-    async def say_error(ctx, error):
+    async def job_error(ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send('Please Specify The Numbers Of Message To Delete')
         if isinstance(error, commands.MissingPermissions):
@@ -166,6 +206,20 @@ async def purge_error(ctx, error):
         await ctx.send("You Can't Use That Command")
 
 
+        
+        
+@bot.command()
+@commands.is_owner()
+async def warn_user(ctx, member: discord.Member, *, reason=None):
+
+  try:
+      mbed = discord.Embed(title='You Have Been Warned ',
+                            color=discord.Color.red())
+      mbed.add_field(name="Reason", value=reason, inline=True)
+      await member.send(embed=mbed)
+      await ctx.channel.send(member.mention + ' Has Been Warned!')
+  except:
+      await ctx.channel.send("Couldn't Dm The Given User")
 # timer function
 @bot.command()
 @commands.has_permissions(manage_messages=True)
@@ -258,6 +312,12 @@ async def ban(ctx, member: discord.Member, *, reason=None):
     await member.kick(reason=reason)
     await ctx.send(f'Banned BY = {member.name} for {reason}')
 
+@bot.command()
+@commands.has_permissions(manage_messages=True)
+async def ns(ctx, *, message):
+    embed = discord.Embed(color=discord.Color.random(), description=message)
+    await ctx.message.delete()
+    await ctx.send(embed=embed)
 # @ban.error
 # async def ban_error(ctx, error):
 #     if isinstance(error, commands.MissingRequiredArgument):
@@ -314,7 +374,7 @@ async def poll(ctx, question, option1=None, option2=None):
 async def suggest(ctx, *, content: str):
   title, description= content.split('/')
   embed = discord.Embed(title=title, description=description, color=0x00ff40)
-  channel = bot.get_channel(1004595078502813736)
+  channel = bot.get_channel(1002063464828780624)
   vote = await channel.send(embed=embed)
   await vote.add_reaction("✅")
   await vote.add_reaction("❌")
@@ -330,6 +390,144 @@ async def suggest(ctx, *, content: str):
 #     embed.set_image(url="https://media1.tenor.com/images/8b07ee1e31fa6131f883ad0fce50189d/tenor.gif?itemid=15667320")
 #     await ctx.member.add_roles(role)
     # await ctx.channel.send(embed=embed)
+@bot.command()
+@commands.has_permissions(manage_messages=True)
+@commands.cooldown(1, 5, commands.BucketType.guild)
+async def tempmute(self, ctx, member: discord.Member, time, d, reason=None):
+    guild = ctx.guild
+    role = discord.utils.get(guild.roles, name="Muted")
+
+    for channel in guild.channels:
+        await channel.set_permissions(role, speak=False, send_messages=False, read_message_history=True, read_messages=False)
+        await member.add_roles(role)
+        embed = discord.Embed(title="Muted!", description=f"{member.mention} has been muted", colour=discord.Colour.blue(
+        ), timestamp=datetime.datetime.utcnow())
+        embed.add_field(name="Reason:", value=reason, inline=False)
+        embed.add_field(name="Time left for the mute:",
+                            value=f"{time}{d}", inline=False)
+        await ctx.reply(embed=embed)
+        if d == "s":
+            await asyncio.sleep(int(time))
+        if d == "m":
+           await asyncio.sleep(int(time*60))
+        if d == "h":
+           await asyncio.sleep(int(time*60*60))
+        if d == "d":
+            await asyncio.sleep(int(time*60*60*24))
+            await member.remove_roles(role)
+            embed = discord.Embed(title="Unmuted", description=f"Unmuted {member.mention} ", colour=discord.Colour.blue(
+            ), timestamp=datetime.datetime.utcnow())
+            await ctx.reply(embed=embed)
+
+@bot.command()
+@commands.has_permissions(manage_messages=True)
+@commands.cooldown(1, 5, commands.BucketType.guild)
+async def mute(ctx, member: discord.Member, *, reason=None):
+    guild = ctx.guild
+    mutedRole = discord.utils.get(guild.roles, name="Muted")
+
+    if not mutedRole:
+        mutedRole = await guild.create_role(name="Muted")
+
+        for channel in guild.channels:
+            await channel.set_permissions(mutedRole, speak=False, send_messages=False, read_message_history=True, read_messages=False)
+            embed = discord.Embed(title="Muted", description=f"{member.mention} was muted ", colour=discord.Colour.blue(
+            ), timestamp=datetime.datetime.utcnow())
+            embed.add_field(name="Reason:", value=reason, inline=False)
+            await ctx.reply(embed=embed)
+            await member.add_roles(mutedRole, reason=reason)
+            await member.send(f"You have been muted from: {guild.name} Reason: {reason}")
+
+@bot.command()
+@commands.cooldown(1, 5, commands.BucketType.guild)
+@commands.has_permissions(manage_messages=True)
+async def unmute(ctx, member: discord.Member):
+    mutedRole = discord.utils.get(ctx.guild.roles, name="Muted")
+    await member.remove_roles(mutedRole)
+    await member.send(f"You have unmuted from: {ctx.guild.name}")
+    embed = discord.Embed(title="Unmute", description=f"Unmuted {member.mention}", colour=discord.Colour.blue(
+    ), timestamp=datetime.datetime.utcnow())
+    await ctx.reply(embed=embed)
+            
+# @bot.command()
+# @commands.command()
+# @commands.has_permissions(kick_members=True)
+# @commands.cooldown(1, 5, commands.BucketType.guild)
+# async def kick(self, ctx, member: discord.Member, reason="No Reason"):
+#     if member == None:
+#         embed = discord.Embed(f"{ctx.message.author}, Please enter a valid user!")
+#         await ctx.reply(embed=embed)
+
+#     else:
+#         guild = ctx.guild
+#         embed = discord.Embed(title="Kicked!", description=f"{member.mention} has been kicked!!", colour=discord.Colour.blue(
+#         ), timestamp=datetime.datetime.utcnow())
+#         embed.add_field(name="Reason: ", value=reason, inline=False)
+#         await ctx.reply(embed=embed)
+#         await guild.kick(user=member)
+
+@bot.command()
+@commands.has_permissions(kick_members=True)
+@commands.cooldown(1, 5, commands.BucketType.guild)
+async def tempban(ctx, member: discord.Member, time, d, *, reason="No Reason"):
+    if member == None:
+        embed = discord.Embed( f"{ctx.message.author}, Please enter a valid user!")
+        await ctx.reply(embed=embed)
+
+    else:
+        guild = ctx.guild
+        embed = discord.Embed(title="Banned!", description=f"{member.mention} has been banned!", colour=discord.Colour.blue(
+        ), timestamp=datetime.datetime.utcnow())
+        embed.add_field(name="Reason: ", value=reason, inline=False)
+        embed.add_field(name="Time left for the ban:", value=f"{time}{d}", inline=False)
+        await ctx.reply(embed=embed)
+        await guild.ban(user=member)
+        if d == "s":
+          await asyncio.sleep(int(time))
+          await guild.unban(user=member)
+        if d == "m":
+            await asyncio.sleep(int(time*60))
+            await guild.unban(user=member)
+        if d == "h":
+            await asyncio.sleep(int(time*60*60))
+            await guild.unban(user=member)
+            if d == "d":
+                await asyncio.sleep(time*60*60*24)
+                await guild.unban(int(user=member))   
+                
+
+@bot.command()
+@commands.has_permissions(kick_members=True)
+@commands.cooldown(1, 5, commands.BucketType.guild)
+async def ban(ctx, member: discord.Member, reason="No Reason"):
+    if member == None:
+        embed = discord.Embed(
+        f"{ctx.message.author}, Please enter a valid user!")
+        await ctx.reply(embed=embed)
+    else:
+        guild = ctx.guild
+        embed = discord.Embed(title="Banned!", description=f"{member.mention} has been banned!", colour=discord.Colour.blue(
+        ), timestamp=datetime.datetime.utcnow())
+        embed.add_field(name="Reason: ", value=reason, inline=False)
+        await ctx.reply(embed=embed)
+        await guild.ban(user=member)
+
+
+@bot.command()
+@commands.has_permissions(kick_members=True)
+@commands.cooldown(1, 5, commands.BucketType.guild)
+async def unban(ctx, user: discord.User):
+    if user == None:
+        embed = discord.Embed(
+        f"{ctx.message.author}, Please enter a valid user!")
+        await ctx.reply(embed=embed)
+
+    else:
+        guild = ctx.guild
+        embed = discord.Embed(title="Unbanned!", description=f"{user.display_name} has been unbanned!", colour=discord.Colour.blue(
+        ), timestamp=datetime.datetime.utcnow())
+        await ctx.reply(embed=embed)
+        await guild.unban(user=user)
 
     
 
