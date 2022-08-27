@@ -51,6 +51,33 @@ async def av(ctx, *, avamember: discord.Member = None):
                 text=f"Requested by {ctx.author}", icon_url=ctx.author.display_avatar.url)
         await ctx.reply(embed=embed, mention_author=False)
         
+@bot.event
+async def on_member_join(member):
+
+  #add the channel id in which you want to send the card
+  channel = bot.get_channel(1001853493541351585)
+
+  #if you want to give any specific roles to any user then you can add like this
+  role = discord.utils.get(member.guild.roles, name="Member")
+  await member.add_roles(role) #if you want to message more message then you can add like this
+  await channel.send(f"Hey {member.mention}! :partying_face: **Welcome To {member.guild.name} For More Information Go To <#1004635808915005460>** **also check rules :red_circle: <#1001854239603175514>**  ")
+
+  #for sending the card
+ 
+
+@bot.event
+async def on_member_remove(member):
+  channel = bot.get_channel(1001853493541351585)
+
+  await channel.send(f"{member.name} Has Left The server, We are going to miss you :cry: ")
+
+
+
+
+
+
+
+
 @bot.command()
 @commands.is_owner() 
 async def userinfo(ctx, *, user: discord.Member = None):
@@ -72,21 +99,6 @@ async def userinfo(ctx, *, user: discord.Member = None):
     embed.set_footer(text='ID: ' + str(user.id))
     return await ctx.send(embed=embed)
 
-@bot.command()
-async def invites(ctx, user = None):
-  if user == None:
-    totalInvites = 0
-    for i in await ctx.guild.invites():
-        if i.inviter == ctx.author:
-            totalInvites += i.uses
-    await ctx.send(f"You've invited {totalInvites} member{'' if totalInvites == 1 else 's'} to the server!")
-  else:
-    totalInvites = 0
-    for i in await ctx.guild.invites():
-       member = ctx.message.guild.get_member_named(user)
-       if i.inviter == member:
-         totalInvites += i.uses
-    await ctx.send(f"{member} has invited {totalInvites} member{'' if totalInvites == 1 else 's'} to the server!")
     
 @bot.command(help="Show's funny random reddit memes")
 @commands.guild_only()
@@ -164,7 +176,22 @@ async def roles(ctx, *, member: MemberRoles):
     await ctx.reply('I see the following roles: ' + ', '.join(member))
 
 
-
+# @bot.command()
+# @commands.has_permissions(manage_messages=True)
+# async def say(ctx, *,msg):
+#     embed=discord.Embed(
+#         title="title",
+#         description=msg,
+#         color = discord.Color.red()
+#     )
+#     embed.set_author(name=ctx.author,icon_url=ctx.author.display_avatar.url)
+#     embed.add_field(name = "field 1", value = 'field value',inline=True)
+#     embed.add_field(name = "field 2", value = 'field value2',inline=True)
+#     embed.add_field(name = "field 3", value = 'field value3',inline=False)
+#     embed.set_footer(text = 'This is Footer')
+#     embed.set_image(url = ctx.guild.icon_url)
+#     embed.set_thumbnail(url = ctx.guild.icon_url)
+#     await ctx.send(embed=embed)
 @bot.command()
 @commands.has_permissions(manage_messages=True)
 async def course(ctx, *, message):
@@ -180,6 +207,7 @@ async def course(ctx, *, message):
 
 @course.error
 async def course_error(ctx, error):
+    async def course_error(ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send('Please Specify The Numbers Of Message To Delete')
         if isinstance(error, commands.MissingPermissions):
@@ -282,7 +310,40 @@ async def timer(ctx, seconds):
         await ctx.send('You Must Enter A Number')
 
 
+# JOIN AND LEAVE CODE
 
+# @bot.command()
+# async def on_member_join(ctx, member):
+#     role = discord.utils.get(member.guild.roles, name='Member')
+#     role = discord.utils.get(bot.get_guild(ctx.guild.id).roles, id ="1001856320217038868")
+#     await member.add_roles(role)
+#     channel = bot.get_channel(1001853493541351585)
+#     embed = discord.Embed(description=f'Hi {member.metion}, Welcome to the guild', color=0x0085ff)
+#     await ctx.member.add_roles(role)
+#     await ctx.channel.send(embed=embed)
+
+# @bot.command()
+# async def on_member_remove(ctx, member):
+#     channel = bot.get_channel(1001853493541351585)
+#     embed = discord.Embed(description=f' {member.metion}, just le the guild', color=0x0085ff)
+#     awaitchannel.send(embed=embed)
+
+
+# FOR MAKING COGS
+
+# extensions=[
+#             'cogs.moderation'
+
+# ]
+# if __name__ == "__main__":
+#     for extension in extensions:
+#         try:
+#             bot.load_extension(extension)
+#         except Exception as e:
+#             print (f'Error loading {extension}', file=sys.stderr)
+#             traceback.print_exc()
+
+# DM COMMAND
 @bot.command()
 @commands.is_owner()
 async def dm(ctx, user: discord.Member, *, args):
@@ -295,6 +356,19 @@ async def dm(ctx, user: discord.Member, *, args):
             await ctx.send('User Has his dm closed')
 
 
+# # BAN COMMAND
+# @bot.command
+# @commands.has_permissions(kick_members=True)
+# async def kick(ctx, member: discord.Member,*,reason=None):
+#     await member.kick(reason=reason)
+#     await ctx.send(f'KICKED BY = {member.name} for {reason}')
+
+# @kick.error
+# async def kick_error(ctx, error):
+#     if isinstance(error, commands.MissingRequiredArgument):
+#         await ctx.send('Please Specify The Person To Kick')
+#     if isinstance(error, commands.MissingPermissions):
+#         await ctx.send("You Can't Use That Command")
 
 @bot.command
 @commands.has_permissions(ban_members=True)
@@ -308,9 +382,34 @@ async def ns(ctx, *, message):
     embed = discord.Embed(color=discord.Color.random(), description=message)
     await ctx.message.delete()
     await ctx.send(embed=embed)
+# @ban.error
+# async def ban_error(ctx, error):
+#     if isinstance(error, commands.MissingRequiredArgument):
+#         await ctx.send('Please Specify The Person To Ban')
+#     if isinstance(error, commands.MissingPermissions):
+#         await ctx.send("You Can't Use That Command")
 
 
+# @bot.command
+# async def unban(ctx, * , member):
+#     banned_users = await ctx.guild.bans()
+#     member_name, member_discriminator = member.split('#')
 
+#     for ban_entry in banned_users:
+#         user = ban_entry.user
+
+#         if(user.name, user.discriminator) == (member_name, member_discriminator):
+#             await ctx.guild.unban(user)
+#             await ctx.send(f'{member.name} was unbaneed')
+
+# @unban.error
+# async def unban_error(ctx, error):
+#     if isinstance(error,commands.MissingRequiredArgument):
+#         await ctx.send('Please Mention user to unban')
+
+
+# Setting `Watching ` status
+# await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="a movie"))
 
 @bot.command()
 async def poll(ctx, question, option1=None, option2=None):
