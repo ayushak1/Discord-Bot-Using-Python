@@ -52,7 +52,9 @@ async def av(ctx, *, avamember: discord.Member = None):
         await ctx.reply(embed=embed, mention_author=False)
         
 @bot.event
+@commands.guild_only()
 async def on_member_join(member):
+
 
   #add the channel id in which you want to send the card
   channel = bot.get_channel(1001853493541351585)
@@ -60,14 +62,16 @@ async def on_member_join(member):
   #if you want to give any specific roles to any user then you can add like this
   role = discord.utils.get(member.guild.roles, name="Member")
   await member.add_roles(role) #if you want to message more message then you can add like this
-  await channel.send(f"Hey {member.mention}! :partying_face: **Welcome To {member.guild.name} For More Information Go To <#1004635808915005460>** **also check rules :red_circle: <#1001854239603175514>**  ")
+  await channel.send(f"Hey {member.mention}! :partying_face: **Welcome To {member.guild.name} For More Information Go To <#1004635808915005460>** **also check rules  <#1001854239603175514>**  ")
 
   #for sending the card
  
 
 @bot.event
+@commands.guild_only()
 async def on_member_remove(member):
-  channel = bot.get_channel(1001853493541351585)
+
+  channel = bot.get_channel(1004595078502813736)
 
   await channel.send(f"{member.name} Has Left The server, We are going to miss you :cry: ")
 
@@ -99,6 +103,21 @@ async def userinfo(ctx, *, user: discord.Member = None):
     embed.set_footer(text='ID: ' + str(user.id))
     return await ctx.send(embed=embed)
 
+@bot.command()
+async def invites(ctx, user = None):
+  if user == None:
+    totalInvites = 0
+    for i in await ctx.guild.invites():
+        if i.inviter == ctx.author:
+            totalInvites += i.uses
+    await ctx.send(f"You've invited {totalInvites} member{'' if totalInvites == 1 else 's'} to the server!")
+  else:
+    totalInvites = 0
+    for i in await ctx.guild.invites():
+       member = ctx.message.guild.get_member_named(user)
+       if i.inviter == member:
+         totalInvites += i.uses
+    await ctx.send(f"{member} has invited {totalInvites} member{'' if totalInvites == 1 else 's'} to the server!")
     
 @bot.command(help="Show's funny random reddit memes")
 @commands.guild_only()
