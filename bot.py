@@ -33,10 +33,12 @@ async def on_ready():
 
 
 @bot.command()
+@commands.guild_only()
 async def hi(ctx):
     await ctx.reply('Hello!')
     
 @bot.command()
+@commands.guild_only()
 @commands.is_owner() 
 async def av(ctx, *, avamember: discord.Member = None):
     if avamember == None:
@@ -83,6 +85,7 @@ async def on_member_remove(member):
 
 
 @bot.command()
+@commands.guild_only()
 @commands.is_owner() 
 async def userinfo(ctx, *, user: discord.Member = None):
     if user is None:
@@ -104,6 +107,8 @@ async def userinfo(ctx, *, user: discord.Member = None):
     return await ctx.send(embed=embed)
 
 @bot.command()
+@commands.guild_only()
+@commands.is_owner()
 async def invites(ctx, user = None):
   if user == None:
     totalInvites = 0
@@ -133,6 +138,7 @@ async def meme(ctx):
             await ctx.reply(embed=embed,mention_author=False)    
 
 @bot.command()
+@commands.guild_only()
 async def help(ctx):
     em = discord.Embed(title= "Help", description= "Use !help <command> for more information ",color=0x9208ea)
     
@@ -146,12 +152,11 @@ async def help(ctx):
     await ctx.reply(embed=em)
     
 
-@bot.command()
-async def owner(ctx,):
-    await ctx.reply(f'My Owner Is Ayush')
+
 
 
 @bot.command()
+@commands.guild_only()
 async def hey(ctx):
     await ctx.reply('Hello! How are you!')
 
@@ -159,6 +164,7 @@ async def hey(ctx):
 
 
 @bot.command()
+@commands.guild_only()
 async def ping(ctx):
    embed = discord.Embed(title=f"🏓Pong! {round(ctx.bot.latency * 1000)}ms", colour=discord.Color.blue())
    await ctx.reply(embed=embed)
@@ -167,6 +173,7 @@ async def ping(ctx):
 
 
 @bot.command(aliases=["mc"])
+@commands.guild_only()
 async def member_count(ctx):
     a = ctx.guild.member_count
     b = discord.Embed(
@@ -181,6 +188,7 @@ class MemberRoles(commands.MemberConverter):
         return [role.name for role in member.roles[1:]]
 
 @bot.command()
+@commands.guild_only()
 async def messages(ctx, channel: discord.TextChannel = None):
     channel = channel or ctx.channel
     count = 0
@@ -190,11 +198,24 @@ async def messages(ctx, channel: discord.TextChannel = None):
 
 
 @bot.command()
+@commands.guild_only()
+@commands.is_owner()
 async def roles(ctx, *, member: MemberRoles):
     """Tells you a member's roles."""
     await ctx.reply('I see the following roles: ' + ', '.join(member))
 
 
+    
+@bot.command()
+@commands.is_owner()
+async def mega(ctx, *, message):
+    embed = discord.Embed(title="MEGA LINK OF ALL CODING PLATFORM COURSES FOR 2 HR ",
+                         color=discord.Color.blue(), description=message)
+    embed.set_thumbnail(url = 'https://cdn.discordapp.com/attachments/1011618287328698508/1013358291037991002/unknown.png')
+    embed.set_footer(text='Courses Hub',
+                     icon_url='https://cdn.discordapp.com/attachments/1001874634142126172/1011282329580339220/hp.jpeg')
+    await ctx.message.delete()
+    await ctx.send(embed=embed)
 # @bot.command()
 # @commands.has_permissions(manage_messages=True)
 # async def say(ctx, *,msg):
@@ -212,6 +233,7 @@ async def roles(ctx, *, member: MemberRoles):
 #     embed.set_thumbnail(url = ctx.guild.icon_url)
 #     await ctx.send(embed=embed)
 @bot.command()
+@commands.guild_only()
 @commands.has_permissions(manage_messages=True)
 async def course(ctx, *, message):
     embed = discord.Embed(title="Courses",
@@ -233,6 +255,7 @@ async def course_error(ctx, error):
             await ctx.send("You Can't Use That Command")
 
 @bot.command()
+@commands.guild_only()
 @commands.has_permissions(manage_messages=True)
 async def job(ctx, *, message):
     embed = discord.Embed(title="JOB UPDATES",color=discord.Color.random(), description=message)
@@ -253,6 +276,7 @@ async def job_error(ctx, error):
             await ctx.send("You Can't Use That Command")
 
 @bot.command()
+@commands.guild_only()
 @commands.has_permissions(manage_messages=True)
 async def say(ctx, *, message):
     embed = discord.Embed(color=discord.Color.random(), description=message)
@@ -276,6 +300,7 @@ async def say_error(ctx, error):
 
 
 @bot.command()
+@commands.guild_only()
 @commands.has_permissions(manage_messages=True)
 async def purge(ctx, amount: int):
     await ctx.channel.purge(limit=amount+1)
@@ -292,6 +317,7 @@ async def purge_error(ctx, error):
         
         
 @bot.command()
+@commands.guild_only()
 @commands.is_owner()
 async def warn_user(ctx, member: discord.Member, *, reason=None):
 
@@ -305,12 +331,13 @@ async def warn_user(ctx, member: discord.Member, *, reason=None):
       await ctx.channel.send("Couldn't Dm The Given User")
 # timer function
 @bot.command()
+@commands.guild_only()
 @commands.has_permissions(manage_messages=True)
 async def timer(ctx, seconds):
     try:
         secondint = int(seconds)
-        if secondint > 600:
-            await ctx.send("I don't think i can go over 10 mins.")
+        if secondint > 7200:
+            await ctx.send("I don't think i can go over 2 hour")
             raise BaseException
         if secondint <= 0:
             await ctx.send("I DONT THINK I CAN GO NEGATIVES")
@@ -364,6 +391,7 @@ async def timer(ctx, seconds):
 
 # DM COMMAND
 @bot.command()
+@commands.guild_only()
 @commands.is_owner()
 async def dm(ctx, user: discord.Member, *, args):
 
@@ -390,12 +418,14 @@ async def dm(ctx, user: discord.Member, *, args):
 #         await ctx.send("You Can't Use That Command")
 
 @bot.command
+@commands.guild_only()
 @commands.has_permissions(ban_members=True)
 async def ban(ctx, member: discord.Member, *, reason=None):
     await member.kick(reason=reason)
     await ctx.send(f'Banned BY = {member.name} for {reason}')
 
 @bot.command()
+@commands.guild_only()
 @commands.has_permissions(manage_messages=True)
 async def ns(ctx, *, message):
     embed = discord.Embed(color=discord.Color.random(), description=message)
@@ -431,6 +461,7 @@ async def ns(ctx, *, message):
 # await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="a movie"))
 
 @bot.command()
+@commands.guild_only()
 async def poll(ctx, question, option1=None, option2=None):
   if option1==None and option2==None:
     await ctx.channel.purge(limit=1)
@@ -454,6 +485,7 @@ async def poll(ctx, question, option1=None, option2=None):
     await message.add_reaction('✅')
 
 @bot.command()
+@commands.guild_only()
 async def suggest(ctx, *, content: str):
   title, description= content.split('/')
   embed = discord.Embed(title=title, description=description, color=0x00ff40)
@@ -474,6 +506,7 @@ async def suggest(ctx, *, content: str):
 #     await ctx.member.add_roles(role)
     # await ctx.channel.send(embed=embed)
 @bot.command()
+@commands.guild_only()
 @commands.has_permissions(manage_messages=True)
 @commands.cooldown(1, 5, commands.BucketType.guild)
 async def tempmute(self, ctx, member: discord.Member, time, d, reason=None):
@@ -503,6 +536,7 @@ async def tempmute(self, ctx, member: discord.Member, time, d, reason=None):
             await ctx.reply(embed=embed)
 
 @bot.command()
+@commands.guild_only()
 @commands.has_permissions(manage_messages=True)
 @commands.cooldown(1, 5, commands.BucketType.guild)
 async def mute(ctx, member: discord.Member, *, reason=None):
@@ -522,6 +556,7 @@ async def mute(ctx, member: discord.Member, *, reason=None):
             await member.send(f"You have been muted from: {guild.name} Reason: {reason}")
 
 @bot.command()
+@commands.guild_only()
 @commands.cooldown(1, 5, commands.BucketType.guild)
 @commands.has_permissions(manage_messages=True)
 async def unmute(ctx, member: discord.Member):
@@ -550,6 +585,7 @@ async def unmute(ctx, member: discord.Member):
 #         await guild.kick(user=member)
 
 @bot.command()
+@commands.guild_only()
 @commands.has_permissions(kick_members=True)
 @commands.cooldown(1, 5, commands.BucketType.guild)
 async def tempban(ctx, member: discord.Member, time, d, *, reason="No Reason"):
@@ -580,6 +616,7 @@ async def tempban(ctx, member: discord.Member, time, d, *, reason="No Reason"):
                 
 
 @bot.command()
+@commands.guild_only()
 @commands.has_permissions(kick_members=True)
 @commands.cooldown(1, 5, commands.BucketType.guild)
 async def ban(ctx, member: discord.Member, reason="No Reason"):
@@ -597,6 +634,7 @@ async def ban(ctx, member: discord.Member, reason="No Reason"):
 
 
 @bot.command()
+@commands.guild_only()
 @commands.has_permissions(kick_members=True)
 @commands.cooldown(1, 5, commands.BucketType.guild)
 async def unban(ctx, user: discord.User):
