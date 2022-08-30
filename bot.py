@@ -151,21 +151,28 @@ async def help(ctx):
     em.timestamp = datetime.datetime.now()         
     await ctx.reply(embed=em)
     
-@bot.command()
-@commands.guild_only()
+snipe_message_author = {}
+snipe_message_content = {}
+ 
+@bot.event
+async def on_message_delete(message):
+     snipe_message_author[message.channel.id] = message.author
+     snipe_message_content[message.channel.id] = message.content
+     await sleep(60)
+     del snipe_message_author[message.channel.id]
+     del snipe_message_content[message.channel.id]
+ 
+@bot.command(name='snipe', help='Shows the last deleted message of the current channel')
+@commands.has_permissions(manage_messages=True)
 async def snipe(ctx):
+    channel = ctx.channel 
     try:
-        contents, author, channel_name, time = bot.sniped_messages[ctx.guild.id]
-        
+        snipeEmbed = discord.Embed(title=f"Last deleted message in #{channel.name}", description =  snipe_message_content[channel.id])
+        snipeEmbed.set_footer(text=f"Message sent by {snipe_message_author[channel.id]}")
+
+        await ctx.send(embed = snipeEmbed)
     except:
-        await ctx.channel.send("Couldn't find a message to snipe!")
-        return
-
-    embed = discord.Embed(description=contents, color=0x00feff, timestamp=time)
-    embed.set_author(name=f"Message sent by {author.name}#{author.discriminator}", icon_url=author.avatar.url)
-    embed.set_footer(text=f"Last deleted message in : #{channel_name}")
-
-    await ctx.channel.send(embed=embed)
+        await ctx.send(f"There are no deleted messages in <#{channel.id}>")
 
 
 
