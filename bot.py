@@ -151,7 +151,21 @@ async def help(ctx):
     em.timestamp = datetime.datetime.now()         
     await ctx.reply(embed=em)
     
+@bot.command()
+@commands.guild_only()
+async def snipe(ctx):
+    try:
+        contents, author, channel_name, time = bot.sniped_messages[ctx.guild.id]
+        
+    except:
+        await ctx.channel.send("Couldn't find a message to snipe!")
+        return
 
+    embed = discord.Embed(description=contents, color=0x00feff, timestamp=time)
+    embed.set_author(name=f"Message sent by {author.name}#{author.discriminator}", icon_url=author.avatar.url)
+    embed.set_footer(text=f"Last deleted message in : #{channel_name}")
+
+    await ctx.channel.send(embed=embed)
 
 
 
