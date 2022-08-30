@@ -13,7 +13,7 @@ from discord import app_commands
 # import traceback
 from discord.ext import commands
 TOKEN = ("MTAxMDk4MTI3MTg1MTI0OTgyNQ.G_ywbS.RqSq0pFyKY3AzFUAGyqO1SvnMMnOmleskq3A_0")
-owners = [538533547145822209] 
+owners = [538533547145822209,995000644660383764] 
 
 
 
