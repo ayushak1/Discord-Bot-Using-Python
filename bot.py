@@ -10,6 +10,7 @@ from threading import Thread
 import random
 import asyncio
 from discord import app_commands
+from datetime import datetime
 # import traceback
 from discord.ext import commands
 TOKEN = ("MTAxMDk4MTI3MTg1MTI0OTgyNQ.G_ywbS.RqSq0pFyKY3AzFUAGyqO1SvnMMnOmleskq3A_0")
@@ -86,9 +87,8 @@ async def uptime(ctx):
     hours, remainder = divmod(int(delta_uptime.total_seconds()), 3600)
     minutes, seconds = divmod(remainder, 60)
     days, hours = divmod(hours, 24)
-    embed = discord.Embed(color=bot.color,description=f"I've been online since `{days}d, {hours}h, {minutes}m, {seconds}s`")
+    embed = discord.Embed(colour=discord.Color.blue(),description=f"I've been online since `{days}d, {hours}h, {minutes}m, {seconds}s`")
     await ctx.reply(embed=embed,mention_author=False)
- 
 
 
 
