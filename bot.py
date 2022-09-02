@@ -59,12 +59,11 @@ async def av(ctx, *, avamember: discord.Member = None):
 async def on_member_join(member):
 
 
-  #add the channel id in which you want to send the card
+  
   channel = bot.get_channel(1001853493541351585)
 
-  #if you want to give any specific roles to any user then you can add like this
+  
   role = discord.utils.get(member.guild.roles, name="Member")
-  await member.add_roles(role) #if you want to message more message then you can add like this
   await channel.send(f"Hey {member.mention}! :partying_face: **Welcome To {member.guild.name} For More Information Go To <#1004635808915005460>** **also check rules  <#1001854239603175514>**  ")
 
   #for sending the card
@@ -99,7 +98,7 @@ async def uptime(ctx):
 @bot.command()
 @commands.guild_only()
 @commands.is_owner() 
-async def userinfo(ctx, *, user: discord.Member = None):
+async def info(ctx, *, user: discord.Member = None):
     if user is None:
         user = ctx.author      
     date_format = "%a, %d %b %Y %I:%M %p"
@@ -118,23 +117,7 @@ async def userinfo(ctx, *, user: discord.Member = None):
     embed.set_footer(text='ID: ' + str(user.id))
     return await ctx.send(embed=embed)
 
-@bot.command()
-@commands.guild_only()
-@commands.is_owner()
-async def invites(ctx, user = None):
-  if user == None:
-    totalInvites = 0
-    for i in await ctx.guild.invites():
-        if i.inviter == ctx.author:
-            totalInvites += i.uses
-    await ctx.send(f"You've invited {totalInvites} member{'' if totalInvites == 1 else 's'} to the server!")
-  else:
-    totalInvites = 0
-    for i in await ctx.guild.invites():
-       member = ctx.message.guild.get_member_named(user)
-       if i.inviter == member:
-         totalInvites += i.uses
-    await ctx.send(f"{member} has invited {totalInvites} member{'' if totalInvites == 1 else 's'} to the server!")
+
     
 @bot.command(help="Show's funny random reddit memes")
 @commands.guild_only()
