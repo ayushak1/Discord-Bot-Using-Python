@@ -14,7 +14,7 @@ from datetime import datetime
 # import traceback
 from discord.ext import commands
 TOKEN = ("MTAxMDk4MTI3MTg1MTI0OTgyNQ.GK-kNC.aEVNVZQTMLQ1ykqpm51z4TdFFangdpoqXG2nNs")
-owners = [538533547145822209,995000644660383764] 
+owners = [538533547145822209] 
 
 
 
