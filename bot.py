@@ -89,7 +89,26 @@ async def uptime(ctx):
     embed = discord.Embed(colour=discord.Color.blue(),description=f"I've been online since `{days}d, {hours}h, {minutes}m, {seconds}s`")
     await ctx.reply(embed=embed,mention_author=False)
 
+@bot.event
+async def on_message_delete(message):
+    embed = discord.Embed(title="{} deleted a message".format(message.author.name),
+                          description="", color=0xFF0000)
+    embed.add_field(name=message.content, value="This is the message that he has deleted",
+                    inline=True)
+    channel = bot.get_channel(1013052975373095005)
+    await channel.send(channel, embed=embed)
 
+
+@bot.event
+async def on_message_edit(message_before, message_after):
+    embed = discord.Embed(title="{} edited a message".format(message_before.author.name),
+                          description="", color=0xFF0000)
+    embed.add_field(name=message_before.content, value="This is the message before any edit",
+                    inline=True)
+    embed.add_field(name=message_after.content, value="This is the message after the edit",
+                    inline=True)
+    channel = bot.get_channel(1013052975373095005)
+    await channel.send(channel, embed=embed)
 
 
 
