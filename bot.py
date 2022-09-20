@@ -3,6 +3,7 @@ from email import message
 from re import T
 import asyncio
 import discord
+import requests
 import datetime
 import aiohttp
 import time
