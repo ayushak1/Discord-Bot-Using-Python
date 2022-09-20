@@ -105,12 +105,159 @@ async def on_message_edit(message_before, message_after):
                     inline=False)
     embed.add_field(name=message_after.content, value="This is the message after the edit",
                     inline=False)
-    channel = bot.get_channel(1013052975373095005)
+    channel = bot.get_channel(1016935229472124958)
     await channel.send(channel, embed=embed)
 
+    
+@bot.command() #Reminds user about the text that he wrote 
+@commands.guild_only()
+@commands.is_owner() 
+async def remind(ctx, user_seconds, *, user_remind_text):
+    #check what end does string have, to set time acordingly
+        time_provided = user_seconds
+        if user_seconds.endswith('h'): #some pajeet code right there
+            user_seconds = user_seconds[:-1]
+            user_seconds = int(user_seconds) * 60 * 60
+        elif user_seconds.endswith('min'):
+            user_seconds = user_seconds[:-3] 
+            user_seconds = int(user_seconds) * 60
+        elif user_seconds.endswith('s'):
+            user_seconds = user_seconds[:-1]
+        elif user_seconds.endswith('d'):
+            user_seconds = user_seconds[:-1]
+            user_seconds = int(user_seconds) * 60 * 60 * 24
+        elif user_seconds.endswith('w'):
+            user_seconds = user_seconds[:-1]
+            user_seconds = int(user_seconds) * 60 * 60 * 24 * 7 
+    #checks if it's positive, if all is good it will start the timer
+        if int(user_seconds) > 0:
+            print(f'{ctx.message.author.name} has used remind_me function, it will last for {user_seconds} seconds')
+            await ctx.send(f'You will be reminded of *{user_remind_text}* in **{time_provided}**')
+            await asyncio.sleep(int(user_seconds))
+            await ctx.send(f'<@{ctx.message.author.id}> I remind you that: {user_remind_text}')
+            print(f'{ctx.message.author.name} has been reminded of {user_remind_text}')
+        elif user_seconds == 0: #checks if user seconds are equal to 0
+            await ctx.send(f"<@{ctx.message.author.id}>, dont choose 0")
+            print(f'{ctx.message.author.name} provided wrong information for the function remind_me')
+        else:
+            await ctx.send('Choose a postive integer')
+            print(f'{ctx.message.author.name} provided wrong information for the function remind_me')
 
+@bot.command(help="Shows Weather of any place")
+# @cooldown(1,7, BucketType.user)
+@commands.guild_only()
+async def weather(ctx,*,place = None):
+            if not place: 
+                embed = discord.Embed(color=discord.Color.random(),description="Write a location to see their weather!")
+                return await ctx.reply(embed = embed)    
+            response = requests.get(f"https://apiv1.spapi.ga/fun/weather?place={place}")
+            data = response.json()
+            weather = discord.Embed(color=discord.Color.random())
+            weather.set_thumbnail(url=f"{data['location']['imagerelativeurl']}")
+            weather.add_field(name="Location",value=f"{data['location']['name']}",inline=False)
+            weather.add_field(name="Temperature",value=f"{data['current']['temperature']}°{data['location']['degreetype']}",inline=False)
+            weather.add_field(name="Sky Text",value=f"{data['current']['skytext']}",inline=False)
+            weather.add_field(name="Observation Time",value=f"{data['current']['observationtime']}",inline=False)
+            weather.add_field(name="Observation Point",value=f"{data['current']['observationpoint']}",inline=False)
+            weather.add_field(name="Humidity",value=f"{data['current']['humidity']}",inline=False)
+            weather.add_field(name="Wind Speed",value=f"{data['current']['windspeed']}",inline=False)
+            weather.set_footer(text=f"Requested by {ctx.author}",icon_url=ctx.author.display_avatar.url)
+            async with ctx.typing():
+                await ctx.reply(embed=weather,mention_author=False)
+  
+@bot.command()
+@commands.guild_only()
+@commands.is_owner() 
+async def joke(ctx):
+        r = requests.get('https://sv443.net/jokeapi/v2/joke/Any')
+        status = r.status_code
+        print(f'{ctx.message.author.name} has requested a joke, status = {status}')
+        joke_data = r.json()
+        joke_type = joke_data["type"]
+        if joke_type == 'twopart': #Basically this let's me know what kind of type of joke this is
+            joke_setup, joke_delivery = joke_data["setup"], joke_data["delivery"]
+            await ctx.send(joke_setup + '\n' + joke_delivery)
+        else:
+            await ctx.send(joke_data['joke'])
 
-
+@bot.command()
+@commands.guild_only()
+@commands.is_owner() 
+async def search(ctx, *, user_question):
+        r = requests.get(f'https://api.duckduckgo.com/?q={user_question}&format=json')
+        print(f'{ctx.message.author.name} has asked a question on duckduckgo about {user_question}, status = {r.status_code}')
+        if r.status_code == 200:
+            answer_data = r.json()
+            try:
+                if answer_data['AbstractText'] != '': #It prioritizes the text from wikipedia
+                    answer_source = answer_data['AbstractSource']
+                    answer_text = answer_data["AbstractText"]
+                    await ctx.send(f'**Answer: **{answer_text}\n**Source: **{answer_source}')
+                elif answer_data["Definition"] !='':
+                    answer_text = answer_text["Definition"]
+                    answer_source = answer_text["DefinitionSource"]
+                    await ctx.send(f'**Answer: **{answer_text}\n**Source: **{answer_source}')
+                elif answer_data["RelatedTopics"][0]["Text"] != '':
+                    answer_text = answer_data["RelatedTopics"][0]["Text"]
+                    await ctx.send(f'**Answer: **{answer_text}')
+                if answer_data["Image"] != '':
+                    url = answer_data["Image"]
+                    async with aiohttp.ClientSession() as session:  
+                        async with session.get(url) as resp:
+                            if resp.status != 200:
+                                return print(f'Could not download file...from {url}')
+                            data = io.BytesIO(await resp.read())
+                    await ctx.send(file=discord.File(data, 'reference.png'))
+            except: #This is some shitty pajeet spagheti code, but I dont care at this point, it was suppost to be temp fix
+                i = 0
+                list_len = 0
+                related_answer_main_text = []
+                while True: #Till it's not IndexError it will keep searching for related stuff
+                    try:
+                        answer_related = answer_data["RelatedTopics"][0]["Topics"][i]['FirstURL']
+                        related_url, related_word = answer_related.split('.com/')
+                        related_url = related_url.title #only done this so that vscode would stop bitching
+                        if '%' not in related_word:
+                            related_word = related_word.replace('_', ' ')
+                            related_word = related_word.replace('d/', '')
+                            list_len += 1
+                            related_answer_main_text.append(f'{list_len}. {related_word}')
+                        i += 1
+                    except IndexError:
+                        break
+                if related_answer_main_text != []:
+                    related_answer_main_text.insert(0, f"I dont have information about {user_question}, but I do have information about:")
+                    await ctx.send("\n".join(related_answer_main_text))
+                else:
+                    await ctx.send(f'I dont have information about {user_question}')    
+        else: #If status code is not 200 it prints out this
+            await ctx.send(f'Something went wrong....') 
+            
+@bot.command()
+@commands.guild_only()
+@commands.is_owner() 
+async def quote(ctx):
+        main_text = []
+        host = 'https://quotes.rest/qod?category=inspire'
+        api_key = "api_key" #You need to get your own api key, from that site
+        headers = {'content-type': 'application/json',
+            'X-TheySaidSo-Api-Secret': format(api_key)}
+        response = requests.get(host, headers=headers)
+        print(f'{ctx.message.author.name} has requested a quote, status = {response.status_code}')
+        if response.status_code == 200:
+            quotes=response.json()['contents']['quotes'][0]["quote"]
+            main_text.append(quotes)
+            author = response.json()['contents']['quotes'][0]["author"]
+            main_text.append(f'**Author: **{author}')
+            await ctx.send("\n".join(main_text))
+        elif response.status_code == 429: 
+            await ctx.send('Hourly quote limit has been reached')
+        else:
+            await ctx.send('Something went wrong.... ')          
+            
+            
+            
+            
 
 @bot.command()
 @commands.guild_only()
