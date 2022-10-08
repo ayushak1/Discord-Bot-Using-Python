@@ -74,7 +74,7 @@ async def on_member_join(member):
 @commands.guild_only()
 async def on_member_remove(member):
 
-  channel = bot.get_channel(1013052975373095005)
+  channel = bot.get_channel(1016935229472124958)
 
   await channel.send(f"{member.name} Has Left The server, We are going to miss you :cry: ")
 
