@@ -30,7 +30,7 @@ bot = commands.Bot(command_prefix='!', case_insensitive=True,intents=discord.Int
 @bot.event
 async def on_ready():
     await bot.load_extension("jishaku")
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{len(bot.users)} users"))
+    await bot.change_presence(status=discord.Status.dnd,activity=discord.Activity(type=discord.ActivityType.watching, name=f"{len(bot.users)} users"))
     print("I am Ready")
 
 
