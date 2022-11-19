@@ -19,7 +19,7 @@ owners = [538533547145822209,900421898108821564]
 
 
 
-bot = commands.Bot(command_prefix='!', case_insensitive=True,intents=discord.Intents.all(),owner_ids=set(owners),help_command=None)
+bot = commands.Bot(command_prefix='', case_insensitive=True,intents=discord.Intents.all(),owner_ids=set(owners),help_command=None)
 
 # with open("./config.json", 'r') as configjsonFile:
 #         configData = json.load(configjsonFile)
